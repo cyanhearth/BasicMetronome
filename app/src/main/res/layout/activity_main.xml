@@ -11,9 +11,9 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/instruction"
         android:id="@+id/textView"
+        android:layout_marginTop="184dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="46dp" />
+        android:layout_centerHorizontal="true" />
 
     <EditText
         android:layout_width="wrap_content"

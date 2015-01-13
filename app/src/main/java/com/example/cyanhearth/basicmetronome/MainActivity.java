@@ -1,5 +1,6 @@
 package com.example.cyanhearth.basicmetronome;
 
+import android.content.res.Resources;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -13,19 +14,39 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class MainActivity extends ActionBarActivity {
 
-    SoundPool pool;
-    Button button;
-    int id;
+    private SoundPool pool;
+    private Button button;
+    private int id;
+    private int tempo;
+    private int period;
+
+    private EditText tempoSelection;
+    private TextView notifyError;
+
+    private Timer timer;
+    private TimerTask repeat;
+
+    private Resources res;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        res = getResources();
+
+        timer = new Timer();
+
         button = (Button) findViewById(R.id.button);
+
+        tempoSelection = (EditText) findViewById(R.id.editText);
+        notifyError = (TextView) findViewById(R.id.textView2);
 
         // load SoundPool differently depending on Android version
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -45,21 +66,48 @@ public class MainActivity extends ActionBarActivity {
 
         id = pool.load(this, R.raw.blip, 1);
 
+
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                /*
-                Get the value the user entered for the tempo
-                TODO: filter for appropriate values
-                */
-                EditText tempoSelection = (EditText) findViewById(R.id.editText);
-                int tempo = Integer.parseInt(tempoSelection.getText().toString());
+                notifyError.setText("");
 
-                //Set to display tempo value for testing
-                //TextView displayTempo = (TextView) findViewById(R.id.textView2);
-                //displayTempo.setText(String.valueOf(tempo));
-                pool.play(id, 1, 1, 1, -1, 1);
+                //Get the value the user entered for the tempo
+                tempo = Integer.parseInt(tempoSelection.getText().toString());
+
+                if (tempo < 40 || tempo > 200) {
+
+                    notifyError.setText(res.getString(R.string.wrong_tempo));
+                    return;
+
+                }
+
+                // period in milliseconds
+                period = 60000 / tempo;
+
+                if (button.getText().toString().equals(res.getString(R.string.button_text_start))) {
+
+                    repeat = new TimerTask() {
+                        @Override
+                        public void run() {
+                            pool.play(id, 1, 1, 1, 0, 1);
+                        }
+                    };
+
+                    timer.schedule(repeat, 0, period);
+
+                    button.setText(res.getString(R.string.button_text_stop));
+
+                }
+                else {
+
+                    repeat.cancel();
+
+                    button.setText(res.getString(R.string.button_text_start));
+
+                }
             }
         });
     }

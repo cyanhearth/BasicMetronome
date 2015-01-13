@@ -8,4 +8,6 @@
     <string name="button_text_start">Start</string>
     <string name="button_text_stop">Stop</string>
 
+    <string name="wrong_tempo">Please enter a tempo between 40 and 200 bpm</string>
+
 </resources>
