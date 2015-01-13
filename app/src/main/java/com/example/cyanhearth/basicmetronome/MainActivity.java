@@ -10,10 +10,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,13 +25,16 @@ import java.util.TimerTask;
 public class MainActivity extends ActionBarActivity {
 
     private SoundPool pool;
+    private HashMap<String, Integer> soundPoolMap;
     private Button button;
-    private int id;
+    private String sound_id;
     private int tempo;
     private int period;
 
     private EditText tempoSelection;
     private TextView notifyError;
+
+    private Spinner soundsSpinner;
 
     private Timer timer;
     private TimerTask repeat;
@@ -36,6 +43,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -47,6 +55,30 @@ public class MainActivity extends ActionBarActivity {
 
         tempoSelection = (EditText) findViewById(R.id.editText);
         notifyError = (TextView) findViewById(R.id.textView2);
+
+        soundPoolMap = new HashMap<> ();
+
+        //initialize and populate the sounds spinner
+        soundsSpinner = (Spinner) findViewById(R.id.spinner);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.sounds_array, android.R.layout.simple_spinner_item);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        soundsSpinner.setAdapter(adapter);
+
+        soundsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                sound_id = (String) parent.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         // load SoundPool differently depending on Android version
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -64,9 +96,8 @@ public class MainActivity extends ActionBarActivity {
             pool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
         }
 
-        id = pool.load(this, R.raw.blip, 1);
-
-
+        soundPoolMap.put("Blip", pool.load(this, R.raw.blip, 1));
+        soundPoolMap.put("Boop", pool.load(this, R.raw.boop, 1));
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,15 +115,19 @@ public class MainActivity extends ActionBarActivity {
 
                 }
 
+                tempoSelection.setFocusable(false);
+
                 // period in milliseconds
                 period = 60000 / tempo;
+
+                //id = soundPoolMap.get(1);
 
                 if (button.getText().toString().equals(res.getString(R.string.button_text_start))) {
 
                     repeat = new TimerTask() {
                         @Override
                         public void run() {
-                            pool.play(id, 1, 1, 1, 0, 1);
+                            pool.play(soundPoolMap.get(sound_id), 1, 1, 1, 0, 1);
                         }
                     };
 
@@ -106,6 +141,8 @@ public class MainActivity extends ActionBarActivity {
                     repeat.cancel();
 
                     button.setText(res.getString(R.string.button_text_start));
+
+                    tempoSelection.setFocusableInTouchMode(true);
 
                 }
             }
