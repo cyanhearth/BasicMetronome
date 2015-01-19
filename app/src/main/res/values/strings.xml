@@ -11,10 +11,18 @@
     <string name="wrong_tempo">Please enter a tempo between 40 and 200 bpm</string>
 
     <string name="sound1">Blip</string>
+    <string name="default_tempo">150</string>
 
     <string-array name="sounds_array">
         <item>Blip</item>
         <item>Boop</item>
+    </string-array>
+
+    <string-array name="time_sigs">
+        <item>2/4</item>
+        <item>3/4</item>
+        <item>4/4</item>
+        <item>4/8</item>
     </string-array>
 
 </resources>
